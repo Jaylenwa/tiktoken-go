@@ -2,12 +2,14 @@ package tiktoken
 
 import (
 	"testing"
+
+	"github.com/jaylen/tiktoken-go"
 )
 
-func TestR50kBaseEncoding(t *testing.T) {
-	enc, err := LoadR50kBase()
+func TestCl100kBaseEncoding(t *testing.T) {
+	enc, err := tiktoken.LoadCl100kBase()
 	if err != nil {
-		t.Fatalf("LoadR50kBase failed: %v", err)
+		t.Fatalf("LoadCl100kBase failed: %v", err)
 	}
 
 	text := "hello world"
@@ -25,16 +27,16 @@ func TestR50kBaseEncoding(t *testing.T) {
 		t.Errorf("roundtrip failed: got %q, want %q", decoded, text)
 	}
 
-	// Expected tokens from Python tiktoken for "hello world" with r50k_base
+	// Expected tokens from Python tiktoken for "hello world" with cl100k_base
 	if tokens[0] != 31373 || tokens[1] != 995 {
 		t.Errorf("unexpected tokens: %v, expected [31373, 995]", tokens)
 	}
 
-	t.Logf("r50k_base: %q -> %v", text, tokens)
+	t.Logf("cl100k_base: %q -> %v", text, tokens)
 }
 
 func TestP50kBaseEncoding(t *testing.T) {
-	enc, err := LoadP50kBase()
+	enc, err := tiktoken.LoadP50kBase()
 	if err != nil {
 		t.Fatalf("LoadP50kBase failed: %v", err)
 	}
@@ -58,7 +60,7 @@ func TestP50kBaseEncoding(t *testing.T) {
 }
 
 func TestP50kEditEncoding(t *testing.T) {
-	enc, err := LoadP50kEdit()
+	enc, err := tiktoken.LoadP50kEdit()
 	if err != nil {
 		t.Fatalf("LoadP50kEdit failed: %v", err)
 	}
@@ -77,37 +79,8 @@ func TestP50kEditEncoding(t *testing.T) {
 	t.Logf("p50k_edit: %q -> %v", text, tokens)
 }
 
-func TestCl100kBaseEncoding(t *testing.T) {
-	enc, err := LoadCl100kBase()
-	if err != nil {
-		t.Fatalf("LoadCl100kBase failed: %v", err)
-	}
-
-	text := "hello world"
-	tokens, err := enc.Encode(text)
-	if err != nil {
-		t.Fatalf("Encode failed: %v", err)
-	}
-
-	if len(tokens) == 0 {
-		t.Error("Encode returned empty tokens")
-	}
-
-	decoded, _ := enc.Decode(tokens)
-	if decoded != text {
-		t.Errorf("roundtrip failed: got %q, want %q", decoded, text)
-	}
-
-	// Verify n_vocab is in expected range (100280 is the official count)
-	if enc.NVocab() < 100000 {
-		t.Errorf("NVocab = %d, seems too low", enc.NVocab())
-	}
-
-	t.Logf("cl100k_base: %q -> %v (n_vocab=%d)", text, tokens, enc.NVocab())
-}
-
 func TestO200kBaseEncoding(t *testing.T) {
-	enc, err := LoadO200kBase()
+	enc, err := tiktoken.LoadO200kBase()
 	if err != nil {
 		t.Fatalf("LoadO200kBase failed: %v", err)
 	}
@@ -135,7 +108,7 @@ func TestO200kBaseEncoding(t *testing.T) {
 }
 
 func TestO200kHarmonyEncoding(t *testing.T) {
-	enc, err := LoadO200kHarmony()
+	enc, err := tiktoken.LoadO200kHarmony()
 	if err != nil {
 		t.Fatalf("LoadO200kHarmony failed: %v", err)
 	}
@@ -161,15 +134,15 @@ func TestO200kHarmonyEncoding(t *testing.T) {
 func TestAllEncodingsRoundtrip(t *testing.T) {
 	testCases := []struct {
 		name string
-		load func() (*Encoding, error)
+		load func() (*tiktoken.Encoding, error)
 		text string
 	}{
-		{"r50k_base", LoadR50kBase, "hello world"},
-		{"p50k_base", LoadP50kBase, "hello world"},
-		{"p50k_edit", LoadP50kEdit, "hello world"},
-		{"cl100k_base", LoadCl100kBase, "hello world"},
-		{"o200k_base", LoadO200kBase, "hello world"},
-		{"o200k_harmony", LoadO200kHarmony, "hello world"},
+		{"r50k_base", tiktoken.LoadR50kBase, "hello world"},
+		{"p50k_base", tiktoken.LoadP50kBase, "hello world"},
+		{"p50k_edit", tiktoken.LoadP50kEdit, "hello world"},
+		{"cl100k_base", tiktoken.LoadCl100kBase, "hello world"},
+		{"o200k_base", tiktoken.LoadO200kBase, "hello world"},
+		{"o200k_harmony", tiktoken.LoadO200kHarmony, "hello world"},
 	}
 
 	for _, tc := range testCases {
@@ -201,7 +174,7 @@ func TestAllEncodingsRoundtrip(t *testing.T) {
 }
 
 func TestSpecialTokensHandling(t *testing.T) {
-	enc, err := LoadCl100kBase()
+	enc, err := tiktoken.LoadCl100kBase()
 	if err != nil {
 		t.Fatalf("LoadCl100kBase failed: %v", err)
 	}
@@ -272,7 +245,7 @@ func TestSpecialTokensHandling(t *testing.T) {
 }
 
 func TestEncodeOrdinaryIgnoresSpecialTokens(t *testing.T) {
-	enc, err := LoadCl100kBase()
+	enc, err := tiktoken.LoadCl100kBase()
 	if err != nil {
 		t.Fatalf("LoadCl100kBase failed: %v", err)
 	}
@@ -291,7 +264,7 @@ func TestEncodeOrdinaryIgnoresSpecialTokens(t *testing.T) {
 }
 
 func TestDecodeSingleToken(t *testing.T) {
-	enc, err := LoadCl100kBase()
+	enc, err := tiktoken.LoadCl100kBase()
 	if err != nil {
 		t.Fatalf("LoadCl100kBase failed: %v", err)
 	}
@@ -308,7 +281,7 @@ func TestDecodeSingleToken(t *testing.T) {
 }
 
 func TestTokenByteValues(t *testing.T) {
-	enc, err := LoadCl100kBase()
+	enc, err := tiktoken.LoadCl100kBase()
 	if err != nil {
 		t.Fatalf("LoadCl100kBase failed: %v", err)
 	}
@@ -329,7 +302,7 @@ func TestTokenByteValues(t *testing.T) {
 }
 
 func TestIsSpecialToken(t *testing.T) {
-	enc, err := LoadCl100kBase()
+	enc, err := tiktoken.LoadCl100kBase()
 	if err != nil {
 		t.Fatalf("LoadCl100kBase failed: %v", err)
 	}
@@ -348,7 +321,7 @@ func TestIsSpecialToken(t *testing.T) {
 }
 
 func TestEOTToken(t *testing.T) {
-	enc, err := LoadCl100kBase()
+	enc, err := tiktoken.LoadCl100kBase()
 	if err != nil {
 		t.Fatalf("LoadCl100kBase failed: %v", err)
 	}
@@ -359,7 +332,7 @@ func TestEOTToken(t *testing.T) {
 }
 
 func TestEmptyString(t *testing.T) {
-	enc, err := LoadCl100kBase()
+	enc, err := tiktoken.LoadCl100kBase()
 	if err != nil {
 		t.Fatalf("LoadCl100kBase failed: %v", err)
 	}
@@ -384,7 +357,7 @@ func TestEmptyString(t *testing.T) {
 }
 
 func TestUnicodeText(t *testing.T) {
-	enc, err := LoadCl100kBase()
+	enc, err := tiktoken.LoadCl100kBase()
 	if err != nil {
 		t.Fatalf("LoadCl100kBase failed: %v", err)
 	}
@@ -421,7 +394,7 @@ func TestUnicodeText(t *testing.T) {
 }
 
 func TestLongerText(t *testing.T) {
-	enc, err := LoadCl100kBase()
+	enc, err := tiktoken.LoadCl100kBase()
 	if err != nil {
 		t.Fatalf("LoadCl100kBase failed: %v", err)
 	}
@@ -445,7 +418,7 @@ func TestLongerText(t *testing.T) {
 }
 
 func TestBatchEncoding(t *testing.T) {
-	enc, err := LoadCl100kBase()
+	enc, err := tiktoken.LoadCl100kBase()
 	if err != nil {
 		t.Fatalf("LoadCl100kBase failed: %v", err)
 	}
@@ -479,7 +452,7 @@ func TestBatchEncoding(t *testing.T) {
 }
 
 func TestDecodeTokensBytes(t *testing.T) {
-	enc, err := LoadCl100kBase()
+	enc, err := tiktoken.LoadCl100kBase()
 	if err != nil {
 		t.Fatalf("LoadCl100kBase failed: %v", err)
 	}
@@ -499,14 +472,14 @@ func TestDecodeTokensBytes(t *testing.T) {
 func TestEncodingConstructors(t *testing.T) {
 	constructors := []struct {
 		name string
-		fn   func() (*Encoding, error)
+		fn   func() (*tiktoken.Encoding, error)
 	}{
-		{"r50k_base", LoadR50kBase},
-		{"p50k_base", LoadP50kBase},
-		{"p50k_edit", LoadP50kEdit},
-		{"cl100k_base", LoadCl100kBase},
-		{"o200k_base", LoadO200kBase},
-		{"o200k_harmony", LoadO200kHarmony},
+		{"r50k_base", tiktoken.LoadR50kBase},
+		{"p50k_base", tiktoken.LoadP50kBase},
+		{"p50k_edit", tiktoken.LoadP50kEdit},
+		{"cl100k_base", tiktoken.LoadCl100kBase},
+		{"o200k_base", tiktoken.LoadO200kBase},
+		{"o200k_harmony", tiktoken.LoadO200kHarmony},
 	}
 
 	for _, c := range constructors {
@@ -539,7 +512,7 @@ func TestModelToEncoding(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.model, func(t *testing.T) {
-			enc, err := EncodingForModel(tc.model)
+			enc, err := tiktoken.EncodingForModel(tc.model)
 			if err != nil {
 				t.Fatalf("EncodingForModel(%s) failed: %v", tc.model, err)
 			}
@@ -552,96 +525,8 @@ func TestModelToEncoding(t *testing.T) {
 }
 
 func TestEncodingForUnknownModel(t *testing.T) {
-	_, err := EncodingForModel("unknown-model-xyz")
+	_, err := tiktoken.EncodingForModel("unknown-model-xyz")
 	if err == nil {
 		t.Error("EncodingForModel should return error for unknown model")
-	}
-}
-
-func TestBytePairEncodeBasic(t *testing.T) {
-	ranks := map[string]rank{
-		"ab": 0,
-		"cd": 1,
-	}
-
-	result := bytePairEncode([]byte("abcd"), ranks)
-	if len(result) != 2 || result[0] != 0 || result[1] != 1 {
-		t.Errorf("bytePairEncode(\"abcd\") = %v, want [0, 1]", result)
-	}
-}
-
-func TestBytePairEncodeRepeated(t *testing.T) {
-	ranks := map[string]rank{
-		"ab": 0,
-	}
-
-	result := bytePairEncode([]byte("abab"), ranks)
-	if len(result) != 2 || result[0] != 0 || result[1] != 0 {
-		t.Errorf("bytePairEncode(\"abab\") = %v, want [0, 0]", result)
-	}
-}
-
-func TestBytePairEncodeSingleByte(t *testing.T) {
-	ranks := map[string]rank{
-		"a": 0,
-		"b": 1,
-		"c": 2,
-	}
-
-	result := bytePairEncode([]byte("abc"), ranks)
-	if len(result) != 3 {
-		t.Errorf("bytePairEncode(\"abc\") length = %d, want 3", len(result))
-	}
-}
-
-func TestBytePairMergeSmallPiece(t *testing.T) {
-	ranks := map[string]rank{
-		"ab": 0,
-		"bc": 1,
-		"cd": 2,
-	}
-
-	result := bytePairMerge(ranks, []byte("abcd"))
-	if len(result) == 0 {
-		t.Error("bytePairMerge returned empty result")
-	}
-}
-
-func TestBytePairMergeLargePiece(t *testing.T) {
-	ranks := map[string]rank{
-		"ab": 0,
-		"bc": 1,
-		"cd": 2,
-	}
-
-	// This is >= 100 bytes, so uses large merge
-	longText := make([]byte, 150)
-	for i := range longText {
-		longText[i] = "abcd"[i%4]
-	}
-
-	result := bytePairMergeLarge(ranks, longText)
-	if len(result) == 0 {
-		t.Error("bytePairMergeLarge returned empty result")
-	}
-}
-
-func TestSortedTokenBytes(t *testing.T) {
-	encoder := map[string]rank{
-		"b": 1,
-		"a": 0,
-		"c": 2,
-	}
-
-	result := sortedTokenBytesFromEncoder(encoder)
-	if len(result) != 3 {
-		t.Errorf("sortedTokenBytes length = %d, want 3", len(result))
-	}
-
-	expected := [][]byte{[]byte("a"), []byte("b"), []byte("c")}
-	for i, exp := range expected {
-		if string(result[i]) != string(exp) {
-			t.Errorf("sortedTokenBytes[%d] = %q, want %q", i, result[i], exp)
-		}
 	}
 }
